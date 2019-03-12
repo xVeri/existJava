@@ -5,10 +5,40 @@
  */
 package ExistJavaDAO;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author xveri
  */
 class Evento {
+    private String userName;
+    private String message;
+    private int type;
+
+    public Evento(String userName, Empleado x, int type) {
+        this.userName = userName;
+        this.message = setMessage(x, type);
+        this.type = type;
+    }
     
+    private String setMessage(Empleado x, int type) {
+        Date date = new Date();
+        SimpleDateFormat y = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        String aux = "";
+        switch(type) {
+            case 0:
+                aux = "User '" + x.getUserName() + "' logged into the system at " + y.format(date);
+                break;
+            case 1:
+                aux = "User '" + x.getUserName() + "' created an urgent incident at " + y.format(date);
+                break;
+            case 2:
+                aux = "User '" + x.getUserName() + "' made a query at " + y.format(date);
+                break;
+        }
+        return aux;
+    }
 }
+

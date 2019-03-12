@@ -20,10 +20,10 @@ public class EmpresaXND implements DAOInterface {
     private final String uri = "xmldb:exist://localhost:8080/exist/xmlrpc";
     private final String user = "admin";
     private final String pass = "";
-    private final String colecEmpleados = "/db/empresa/Empleados";
-    private final String colecIncidencias = "/db/empresa/Incidencias";
-    private final String colecEvento = "/db/empresa/Eventos";
-    private final String colecRankingTO = "/db/empresa/RankingsTO";
+    private final String colecEmpleados = "/db/empleados/employees";
+    private final String colecIncidencias = "/db/empleados/Incidencias";
+    private final String colecEvento = "/db/empleados/Eventos";
+    private final String colecRankingTO = "/db/empleados/RankingsTO";
             
     public EmpresaXND() throws ClassNotFoundException, InstantiationException, IllegalAccessException, XMLDBException {
         String driver = "org.exist.xmldb.DatabaseImpl";
