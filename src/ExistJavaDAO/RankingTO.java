@@ -5,10 +5,25 @@
  */
 package ExistJavaDAO;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author xveri
  */
 class RankingTO {
     
+    private Map<String, Integer> myRanking;
+    
+    public Map<String, Integer> getRanking() {
+        if (myRanking == null) {
+            myRanking = new HashMap<>();
+        }
+        return myRanking;
+    }
+    
+    public void setRanking(Map<String, Integer> myRanking) {
+        this.myRanking = myRanking;
+    }
 }

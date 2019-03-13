@@ -15,6 +15,7 @@ public class Incidencia {
     private String toUser;
     private String message;
     private boolean isUrgent;
+    private boolean isResolved = false;
 
     public Incidencia(String id, Empleado fromUser, String toUser, String message, boolean isUrgent) {
         this.id = id;
@@ -22,5 +23,9 @@ public class Incidencia {
         this.toUser = toUser;
         this.message = message;
         this.isUrgent = isUrgent;
+    }
+    
+    public void resolveIncident() {
+        this.isResolved = true;
     }
 }

@@ -5,16 +5,25 @@
  */
 package ExistJavaDAO;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import javax.xml.transform.OutputKeys;
 import org.xmldb.api.DatabaseManager;
+import org.xmldb.api.base.Collection;
+import org.xmldb.api.base.CompiledExpression;
 import org.xmldb.api.base.Database;
+import org.xmldb.api.base.ResourceSet;
 import org.xmldb.api.base.XMLDBException;
+import org.xmldb.api.modules.XQueryService;
 
 /**
  *
  * @author xveri
  */
 public class EmpresaXND implements DAOInterface {
+
+    //Start of user variables declaration
     
     private final Database database;
     private final String uri = "xmldb:exist://localhost:8080/exist/xmlrpc";
@@ -24,7 +33,11 @@ public class EmpresaXND implements DAOInterface {
     private final String colecIncidencias = "/db/empleados/Incidencias";
     private final String colecEvento = "/db/empleados/Eventos";
     private final String colecRankingTO = "/db/empleados/RankingsTO";
-            
+    
+    //Finish of user variables declaration
+
+    //Start of user functions for DAOInterface
+    
     public EmpresaXND() throws ClassNotFoundException, InstantiationException, IllegalAccessException, XMLDBException {
         String driver = "org.exist.xmldb.DatabaseImpl";
         Class c1;
@@ -34,64 +47,133 @@ public class EmpresaXND implements DAOInterface {
     }
 
     @Override
-    public void insertEmpleado(Empleado e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean insertEmpleado(Empleado e) throws XMLDBException {
+        if (!existEmpleado(e)) {
+            String query
+                    = "update insert <employee>"
+                    + "<userName>" + e.getUserName() + "</userName>"
+                    + "<firstName>" + e.getFirstName() + "</firstName>"
+                    + "<lastName>" + e.getLastName() + "</lastName>"
+                    + "<password>" + e.getPassword() + "</password>"
+                    + "<lastLogin>" + e.getLastLogin() + "</lastLogin>"
+                    + "</employee> into /company";
+            executeQueryUpdate(colecEmpleados, query);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public boolean loginEmpleado(String user, String pass) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     @Override
     public void updateEmpleado(Empleado e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
-    public void removeEmpleado(Empleado e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean removeEmpleado(Empleado e) {
+        return false;
+    }
+    
+    @Override
+    public Incidencia getIncidenciaById(String id) {    //TODO
+        return new Incidencia("s", new Empleado("s", "a", "s", "a", new Date()), "s", "s", true);
+    }
+    
+    @Override
+    public List<Incidencia> selectAllIncidencias() {    //TODO
+        return new ArrayList<Incidencia>();
     }
 
     @Override
-    public Incidencia getIncidenciaById(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean insertIncidencia(Incidencia i) {
+        return false;
     }
 
     @Override
-    public List<Incidencia> selectAllIncidencias() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Incidencia> getIncidenciaByDestino(Empleado e) {    //TODO
+        return new ArrayList<Incidencia>();
+
     }
 
     @Override
-    public void insertIncidencia(Incidencia i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Incidencia> getIncidenciaByOrigen(Empleado e) {     //TODO
+        return new ArrayList<Incidencia>();
     }
 
     @Override
-    public List<Incidencia> getIncidenciaByDestino(Empleado e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean insertarEvento(Evento e) {
+        return false;
     }
 
+    
     @Override
-    public List<Incidencia> getIncidenciaByOrigen(Empleado e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Evento getUltimoInicioSesion(Empleado e) {   //TODO
+        return new Evento("s", new Empleado("s", "s", "s", "s", new Date()), 0);
     }
-
+    
     @Override
-    public void insertarEvento(Evento e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Evento getUltimoInicioSesion(Empleado e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<RankingTO> getRankingEmpleados() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public RankingTO getRankingEmpleados() {    //TODO
+        return new RankingTO();
     }
     
     
+    //Finish of user functions for DAOInterface
+    
+    
+    //Start of user extra functions
+    
+    /**
+     * Set Up the XQueryService
+     *
+     * @param coleccion Path in ExistsDB
+     * @return XQueryService ready to use
+     * @throws XMLDBException
+     */
+    private XQueryService setUpQuery(String coleccion) throws XMLDBException {
+        Collection col = DatabaseManager.getCollection(uri + coleccion, user, pass);
+        XQueryService servicio = (XQueryService) col.getService("XQueryService", "1.0");
+        servicio.setProperty(OutputKeys.INDENT, "yes");
+        servicio.setProperty(OutputKeys.ENCODING, "UTF-8");
+        return servicio;
+    }
+
+    /**
+     * Executes the Query
+     *
+     * @param colection Path in ExistsDB
+     * @param consulta Query
+     * @return ResourceSet of the query
+     * @throws XMLDBException
+     */
+    private ResourceSet executeXQuery(String colection, String consulta) throws XMLDBException {
+        XQueryService service = setUpQuery(colection);
+        ResourceSet result = service.query(consulta);
+        return result;
+    }
+
+    /**
+     * Returns a boolean based in if a username form Empleado does exist or not
+     *
+     * @param e Empleado to create
+     * @return boolean
+     * @throws XMLDBException
+     */
+    private boolean existEmpleado(Empleado e) throws XMLDBException {
+        String query = "for $t in //empleados/employees/userName where $t='" + e.getUserName() + "' return $t";
+        ResourceSet result = executeXQuery(colecEmpleados, query);
+        return result.getSize() > 0;
+    }
+
+    private void executeQueryUpdate(String colection, String query) throws XMLDBException {
+        XQueryService servicio = setUpQuery(colection);
+        CompiledExpression consultaCompilada = servicio.compile(query);
+        servicio.execute(consultaCompilada);
+    }
+    
+    //Finish of user extra functions
 }

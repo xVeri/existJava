@@ -5,6 +5,7 @@
  */
 package ExistJavaDAO;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -16,18 +17,35 @@ public class Empleado {
     private String firstName;
     private String lastName;
     private String password;
-    private Date lastLogin;
+    private String lastLogin;
 
     public Empleado(String userName, String firstName, String lastName, String password, Date lastLogin) {
         this.userName = userName;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
-        this.lastLogin = lastLogin;
+        SimpleDateFormat y = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        this.lastLogin = y.format(lastLogin);
     }
 
     public String getUserName() {
         return userName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getLastLogin() {
+        return lastLogin;
     }
     
     
