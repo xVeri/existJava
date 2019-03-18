@@ -34,6 +34,7 @@ public class EmpresaXND implements DAOInterface {
     private final String colecEvento = "/db/empleados/Eventos";
     private final String colecRankingTO = "/db/empleados/RankingsTO";
     
+    
     //Finish of user variables declaration
 
     //Start of user functions for DAOInterface
@@ -65,8 +66,11 @@ public class EmpresaXND implements DAOInterface {
     }
 
     @Override
-    public boolean loginEmpleado(String user, String pass) {
-        return false;
+    public boolean loginEmpleado(String user, String pass) throws XMLDBException {
+        String query = "for $l in //empleados/employees let $user := $l/userName let $pass := $l/password"
+                + "where $user = '" + user + "' and $pass = '" + pass + "' return $l";
+        ResourceSet result = executeXQuery(colecEmpleados, query);
+        return result.getSize() == 1;
     }
 
     @Override
@@ -168,7 +172,13 @@ public class EmpresaXND implements DAOInterface {
         ResourceSet result = executeXQuery(colecEmpleados, query);
         return result.getSize() > 0;
     }
-
+    
+    /**
+     * Executes the query of a selected colection
+     * @param colection
+     * @param query
+     * @throws XMLDBException 
+     */
     private void executeQueryUpdate(String colection, String query) throws XMLDBException {
         XQueryService servicio = setUpQuery(colection);
         CompiledExpression consultaCompilada = servicio.compile(query);

@@ -18,7 +18,7 @@ public interface DAOInterface {
     public boolean insertEmpleado(Empleado e) throws XMLDBException;
 
     // Método para validar el login de un empleado.
-    public boolean loginEmpleado(String user, String pass);
+    public boolean loginEmpleado(String user, String pass) throws XMLDBException;
 
     // Método para modificar el perfil de un empleado.
     public void updateEmpleado(Empleado e);
