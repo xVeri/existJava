@@ -13,9 +13,13 @@ import org.xmldb.api.DatabaseManager;
 import org.xmldb.api.base.Collection;
 import org.xmldb.api.base.CompiledExpression;
 import org.xmldb.api.base.Database;
+import org.xmldb.api.base.ResourceIterator;
 import org.xmldb.api.base.ResourceSet;
 import org.xmldb.api.base.XMLDBException;
+import org.xmldb.api.modules.XMLResource;
 import org.xmldb.api.modules.XQueryService;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -70,7 +74,18 @@ public class EmpresaXND implements DAOInterface {
         String query = "for $l in //empleados/employees let $user := $l/userName let $pass := $l/password"
                 + "where $user = '" + user + "' and $pass = '" + pass + "' return $l";
         ResourceSet result = executeXQuery(colecEmpleados, query);
-        return result.getSize() == 1;
+        if (result.getSize() == 1) {
+            ResourceIterator iterator = result.getIterator();
+            while(iterator.hasMoreResources()) {
+                XMLResource res = (XMLResource) iterator.nextResource();
+                Node nodo = res.getContentAsDOM();
+                NodeList hijo = nodo.getChildNodes();
+                NodeList datosEmpleado = hijo.item(0).getChildNodes();
+                //FALTA LEER EMPLEADO
+            }
+        }
+        return false;
+        //return result.getSize() == 1;
     }
 
     @Override

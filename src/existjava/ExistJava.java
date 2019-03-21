@@ -5,17 +5,21 @@
  */
 package existjava;
 
+import ExistJavaDAO.Empleado;
+
 /**
  *
  * @author xveri
  */
 public class ExistJava {
+    
+    public static Empleado loggedEmpleado;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        
     }
     
 }
