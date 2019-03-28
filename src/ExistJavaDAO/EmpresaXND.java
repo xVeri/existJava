@@ -37,7 +37,7 @@ public class EmpresaXND implements DAOInterface {
     private final String colecIncidencias = "/db/empleados/Incidencias";
     private final String colecEvento = "/db/empleados/Eventos";
     private final String colecRankingTO = "/db/empleados/RankingsTO";
-    
+    public static Empleado loggedEmpleado;
     
     //Finish of user variables declaration
 
@@ -81,20 +81,42 @@ public class EmpresaXND implements DAOInterface {
                 Node nodo = res.getContentAsDOM();
                 NodeList hijo = nodo.getChildNodes();
                 NodeList datosEmpleado = hijo.item(0).getChildNodes();
-                //FALTA LEER EMPLEADO
+                loggedEmpleado = readDoomEmpleado(datosEmpleado);
             }
+            return true;
         }
         return false;
         //return result.getSize() == 1;
     }
 
     @Override
-    public void updateEmpleado(Empleado e) {
-        
+    public void updateEmpleado(Empleado e) throws XMLDBException{
+        //First name
+        String update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/firstName"
+                + " with <firstName>" + e.getFirstName() + "</firstName>";
+        executeQueryUpdate(colecEmpleados, update);
+        //Last name
+        update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/lastName"
+                + " with <lastName>" + e.getLastName() + "</lastName>";
+        executeQueryUpdate(colecEmpleados, update);
+        //Password
+        update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/password"
+                + " with <password>" + e.getPassword() + "</password>";
+        executeQueryUpdate(colecEmpleados, update);
+        //Date
+        update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/lastLogin"
+                + " with <lastLogin>" + e.getLastLogin() + "</lastLogin>";
+        executeQueryUpdate(colecEmpleados, update);
     }
 
     @Override
-    public boolean removeEmpleado(Empleado e) {
+    public boolean removeEmpleado(Empleado e) throws XMLDBException {
+        if(!existEmpleado(e)) {
+            String query = "for $l in //empleados/employees let $user := $l/userName let $pass := $l/password"
+                + "where $user = '" + e.getUserName() + "' and $pass = '" + e.getPassword() + "' return update delete $l";
+            executeQueryUpdate(colecEmpleados, query);
+            return true;
+        }
         return false;
     }
     
@@ -145,6 +167,41 @@ public class EmpresaXND implements DAOInterface {
     
     
     //Start of user extra functions
+    
+    private Empleado readDoomEmpleado(NodeList datos) {
+        int contador = 1;
+        Empleado e = new Empleado();
+        for (int x = 0; x < datos.getLength(); x++) {
+            Node ntemp = datos.item(x);
+            if (ntemp.getNodeType() == Node.ELEMENT_NODE) {
+                switch(contador) {
+                    case 1:
+                        e.setUserName(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 2:
+                        e.setFirstName(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 3:
+                        e.setLastName(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 4:
+                        e.setPassword(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 5:
+                        e.setLastLogin(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return e;
+    }
     
     /**
      * Set Up the XQueryService

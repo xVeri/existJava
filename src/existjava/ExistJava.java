@@ -13,8 +13,6 @@ import ExistJavaDAO.Empleado;
  */
 public class ExistJava {
     
-    public static Empleado loggedEmpleado;
-
     /**
      * @param args the command line arguments
      */

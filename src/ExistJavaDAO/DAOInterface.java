@@ -21,10 +21,10 @@ public interface DAOInterface {
     public boolean loginEmpleado(String user, String pass) throws XMLDBException;
 
     // Método para modificar el perfil de un empleado.
-    public void updateEmpleado(Empleado e);
+    public void updateEmpleado(Empleado e) throws XMLDBException;
 
     // Método para eliminar un empleado.
-    public boolean removeEmpleado(Empleado e);
+    public boolean removeEmpleado(Empleado e) throws XMLDBException;
 
     // Obtener una Incidencia a partir de su Id.
     public Incidencia getIncidenciaById(String id);

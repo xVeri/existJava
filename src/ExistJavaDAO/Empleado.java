@@ -18,6 +18,8 @@ public class Empleado {
     private String lastName;
     private String password;
     private String lastLogin;
+    
+    public Empleado() {}
 
     public Empleado(String userName, String firstName, String lastName, String password, Date lastLogin) {
         this.userName = userName;
@@ -46,6 +48,26 @@ public class Empleado {
 
     public String getLastLogin() {
         return lastLogin;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setLastLogin(String lastLogin) {
+        this.lastLogin = lastLogin;
     }
     
     
