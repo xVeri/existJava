@@ -70,5 +70,8 @@ public class Empleado {
         this.lastLogin = lastLogin;
     }
     
-    
+    public void setLastLogin(Date x) {
+        SimpleDateFormat y = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        this.lastLogin = y.format(x);
+    }
 }

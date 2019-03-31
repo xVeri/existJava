@@ -6,7 +6,6 @@
 package ExistJavaDAO;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.xml.transform.OutputKeys;
 import org.xmldb.api.DatabaseManager;
@@ -33,8 +32,8 @@ public class EmpresaXND implements DAOInterface {
     private final String user = "admin";
     private final String pass = "";
     private final String colecEmpleados = "/db/empleados/employees";
-    private final String colecIncidencias = "/db/empleados/Incidencias";
-    private final String colecEvento = "/db/empleados/Eventos";
+    private final String colecIncidencias = "/db/empleados/incidents";
+    private final String colecEvento = "/db/empleados/events";
     private final String colecRankingTO = "/db/empleados/RankingsTO";
     public static Empleado loggedEmpleado;
 
