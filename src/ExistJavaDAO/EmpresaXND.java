@@ -28,7 +28,6 @@ import org.w3c.dom.NodeList;
 public class EmpresaXND implements DAOInterface {
 
     //Start of user variables declaration
-    
     private final Database database;
     private final String uri = "xmldb:exist://localhost:8080/exist/xmlrpc";
     private final String user = "admin";
@@ -38,11 +37,9 @@ public class EmpresaXND implements DAOInterface {
     private final String colecEvento = "/db/empleados/Eventos";
     private final String colecRankingTO = "/db/empleados/RankingsTO";
     public static Empleado loggedEmpleado;
-    
-    //Finish of user variables declaration
 
+    //Finish of user variables declaration
     //Start of user functions for DAOInterface
-    
     public EmpresaXND() throws ClassNotFoundException, InstantiationException, IllegalAccessException, XMLDBException {
         String driver = "org.exist.xmldb.DatabaseImpl";
         Class c1;
@@ -71,12 +68,12 @@ public class EmpresaXND implements DAOInterface {
 
     @Override
     public boolean loginEmpleado(String user, String pass) throws XMLDBException {
-        String query = "for $l in //empleados/employees let $user := $l/userName let $pass := $l/password"
+        String query = "for $l in //company/employee let $user := $l/userName let $pass := $l/password"
                 + "where $user = '" + user + "' and $pass = '" + pass + "' return $l";
         ResourceSet result = executeXQuery(colecEmpleados, query);
         if (result.getSize() == 1) {
             ResourceIterator iterator = result.getIterator();
-            while(iterator.hasMoreResources()) {
+            while (iterator.hasMoreResources()) {
                 XMLResource res = (XMLResource) iterator.nextResource();
                 Node nodo = res.getContentAsDOM();
                 NodeList hijo = nodo.getChildNodes();
@@ -86,95 +83,240 @@ public class EmpresaXND implements DAOInterface {
             return true;
         }
         return false;
-        //return result.getSize() == 1;
     }
 
     @Override
-    public void updateEmpleado(Empleado e) throws XMLDBException{
+    public void updateEmpleado(Empleado e) throws XMLDBException {
         //First name
-        String update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/firstName"
+        String update = "update replace /company/employee[userName='" + e.getUserName() + "']/firstName"
                 + " with <firstName>" + e.getFirstName() + "</firstName>";
         executeQueryUpdate(colecEmpleados, update);
         //Last name
-        update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/lastName"
+        update = "update replace /company/employee[userName='" + e.getUserName() + "']/lastName"
                 + " with <lastName>" + e.getLastName() + "</lastName>";
         executeQueryUpdate(colecEmpleados, update);
         //Password
-        update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/password"
+        update = "update replace /company/employee[userName='" + e.getUserName() + "']/password"
                 + " with <password>" + e.getPassword() + "</password>";
         executeQueryUpdate(colecEmpleados, update);
         //Date
-        update = "update replace /Employees/employee[userName='" + e.getUserName() + "']/lastLogin"
+        update = "update replace /company/employee[userName='" + e.getUserName() + "']/lastLogin"
                 + " with <lastLogin>" + e.getLastLogin() + "</lastLogin>";
         executeQueryUpdate(colecEmpleados, update);
     }
 
     @Override
     public boolean removeEmpleado(Empleado e) throws XMLDBException {
-        if(!existEmpleado(e)) {
-            String query = "for $l in //empleados/employees let $user := $l/userName let $pass := $l/password"
-                + "where $user = '" + e.getUserName() + "' and $pass = '" + e.getPassword() + "' return update delete $l";
+        if (!existEmpleado(e)) {
+            String query = "for $l in //company/employee let $user := $l/userName let $pass := $l/password"
+                    + "where $user = '" + e.getUserName() + "' and $pass = '" + e.getPassword() + "' return update delete $l";
             executeQueryUpdate(colecEmpleados, query);
             return true;
         }
         return false;
     }
-    
+
     @Override
-    public Incidencia getIncidenciaById(String id) {    //TODO
-        return new Incidencia("s", new Empleado("s", "a", "s", "a", new Date()), "s", "s", true);
-    }
-    
-    @Override
-    public List<Incidencia> selectAllIncidencias() {    //TODO
-        return new ArrayList<Incidencia>();
+    public Incidencia getIncidenciaById(String id) throws XMLDBException, MyException {    //TODO
+        if (existIncidencia(id)) {
+            Incidencia i;
+            String query = "for $t in //company/incidents/id where $t='" + id + "' return $t";
+            ResourceSet result = executeXQuery(colecIncidencias, query);
+            ResourceIterator iterator = result.getIterator();
+            while (iterator.hasMoreResources()) {
+                XMLResource res = (XMLResource) iterator.nextResource();
+                Node nodo = res.getContentAsDOM();
+                NodeList hijo = nodo.getChildNodes();
+                NodeList datosEmpleado = hijo.item(0).getChildNodes();
+                i = readDoomIncidencia(datosEmpleado);
+                return i;
+            }
+        } else {
+            throw new MyException(0);
+        }
+        return null;
     }
 
     @Override
-    public boolean insertIncidencia(Incidencia i) {
-        return false;
+    public List<Incidencia> selectAllIncidencias() throws XMLDBException {    //TODO
+        List<Incidencia> auxList = new ArrayList<Incidencia>();
+        String query = "for $l in //company/indicents return $l";
+        ResourceSet result = executeXQuery(colecIncidencias, query);
+        ResourceIterator iterator = result.getIterator();
+        while (iterator.hasMoreResources()) {
+            XMLResource res = (XMLResource) iterator.nextResource();
+            Node nodo = res.getContentAsDOM();
+            NodeList hijo = nodo.getChildNodes();
+            NodeList datosEmpleado = hijo.item(0).getChildNodes();
+            Incidencia i = readDoomIncidencia(datosEmpleado);
+            auxList.add(i);
+        }
+        return auxList;
     }
 
     @Override
-    public List<Incidencia> getIncidenciaByDestino(Empleado e) {    //TODO
-        return new ArrayList<Incidencia>();
+    public boolean insertIncidencia(Incidencia i) throws XMLDBException {
+        if (!existIncidencia(i.getId())) {
+            String query
+                    = "update insert <incidents>"
+                    + "<id>" + i.getId() + "</id>"
+                    + "<fromUser>" + i.getFromUser() + "</fromUser>"
+                    + "<toUser>" + i.getToUser() + "</toUser>"
+                    + "<message>" + i.getMessage() + "</message>"
+                    + "<isUrgent>" + i.isIsUrgent() + "</isUrgent>"
+                    + "<isResolved>" + i.isIsResolved() + "</isResolved>"
+                    + "</incidents> into /company";
+            executeQueryUpdate(colecIncidencias, query);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public List<Incidencia> getIncidenciaByDestino(Empleado e) throws XMLDBException {    //TODO
+        List<Incidencia> auxList = new ArrayList<Incidencia>();
+        String query = "for $t in //company/incidents/toUser where $t='" + e.getUserName() + "' return $t";
+        ResourceSet result = executeXQuery(colecIncidencias, query);
+        ResourceIterator iterator = result.getIterator();
+        while (iterator.hasMoreResources()) {
+            XMLResource res = (XMLResource) iterator.nextResource();
+            Node nodo = res.getContentAsDOM();
+            NodeList hijo = nodo.getChildNodes();
+            NodeList datosEmpleado = hijo.item(0).getChildNodes();
+            Incidencia i = readDoomIncidencia(datosEmpleado);
+            auxList.add(i);
+        }
+        return auxList;
 
     }
 
     @Override
-    public List<Incidencia> getIncidenciaByOrigen(Empleado e) {     //TODO
-        return new ArrayList<Incidencia>();
+    public List<Incidencia> getIncidenciaByOrigen(Empleado e) throws XMLDBException {     //TODO
+        List<Incidencia> auxList = new ArrayList<Incidencia>();
+        String query = "for $t in //company/incidents/fromUser where $t='" + e.getUserName() + "' return $t";
+        ResourceSet result = executeXQuery(colecIncidencias, query);
+        ResourceIterator iterator = result.getIterator();
+        while (iterator.hasMoreResources()) {
+            XMLResource res = (XMLResource) iterator.nextResource();
+            Node nodo = res.getContentAsDOM();
+            NodeList hijo = nodo.getChildNodes();
+            NodeList datosEmpleado = hijo.item(0).getChildNodes();
+            Incidencia i = readDoomIncidencia(datosEmpleado);
+            auxList.add(i);
+        }
+        return auxList;
     }
 
     @Override
-    public boolean insertarEvento(Evento e) {
-        return false;
+    public void insertarEvento(Evento e) throws XMLDBException {
+        String query
+                = "update insert <event>"
+                + "<userName>" + e.getUserName() + "</userName>"
+                + "<message>" + e.getMessage() + "</message>"
+                + "<type>" + e.getType() + "</type>"
+                + "</event> into /company";
+        executeQueryUpdate(colecEvento, query);
+
     }
 
-    
     @Override
-    public Evento getUltimoInicioSesion(Empleado e) {   //TODO
-        return new Evento("s", new Empleado("s", "s", "s", "s", new Date()), 0);
+    public Evento getUltimoInicioSesion(Empleado e) throws XMLDBException {   //TODO
+        Evento x = new Evento();
+        String query = "for $l in //company/event let $user := $l/userName let $type := $l/type"
+                    + "where $user = '" + e.getUserName() + "' and $type = '" + 0 + "' return $l";
+        ResourceSet result = executeXQuery(colecEvento, query);
+        ResourceIterator iterator = result.getIterator();
+        while (iterator.hasMoreResources()) {
+            XMLResource res = (XMLResource) iterator.nextResource();
+            Node nodo = res.getContentAsDOM();
+            NodeList hijo = nodo.getChildNodes();
+            NodeList datosEmpleado = hijo.item(0).getChildNodes();
+            x = readDoomEvento(datosEmpleado);
+        }
+        return x;
     }
-    
+
     @Override
     public RankingTO getRankingEmpleados() {    //TODO
         return new RankingTO();
     }
-    
-    
+
     //Finish of user functions for DAOInterface
-    
-    
     //Start of user extra functions
+    private Evento readDoomEvento(NodeList datos) {
+        int contador = 1;
+        Evento i = new Evento();
+        for (int x = 0; x < datos.getLength(); x++) {
+            Node ntemp = datos.item(x);
+            if (ntemp.getNodeType() == Node.ELEMENT_NODE) {
+                switch (contador) {
+                    case 1:
+                        i.setUserName(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 2:
+                        i.setMessage(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 3:
+                        i.setType(Integer.parseInt(ntemp.getChildNodes().item(0).getNodeValue()));
+                        contador++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return i;
+    }
     
+    private Incidencia readDoomIncidencia(NodeList datos) {
+        int contador = 1;
+        Incidencia i = new Incidencia();
+        for (int x = 0; x < datos.getLength(); x++) {
+            Node ntemp = datos.item(x);
+            if (ntemp.getNodeType() == Node.ELEMENT_NODE) {
+                switch (contador) {
+                    case 1:
+                        i.setId(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 2:
+                        i.setFromUser(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 3:
+                        i.setToUser(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 4:
+                        i.setMessage(ntemp.getChildNodes().item(0).getNodeValue());
+                        contador++;
+                        break;
+                    case 5:
+                        i.setIsUrgent(Boolean.parseBoolean(ntemp.getChildNodes().item(0).getNodeValue()));
+                        contador++;
+                        break;
+                    case 6:
+                        i.setIsResolved(Boolean.parseBoolean(ntemp.getChildNodes().item(0).getNodeValue()));
+                        contador++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return i;
+    }
+
     private Empleado readDoomEmpleado(NodeList datos) {
         int contador = 1;
         Empleado e = new Empleado();
         for (int x = 0; x < datos.getLength(); x++) {
             Node ntemp = datos.item(x);
             if (ntemp.getNodeType() == Node.ELEMENT_NODE) {
-                switch(contador) {
+                switch (contador) {
                     case 1:
                         e.setUserName(ntemp.getChildNodes().item(0).getNodeValue());
                         contador++;
@@ -202,7 +344,7 @@ public class EmpresaXND implements DAOInterface {
         }
         return e;
     }
-    
+
     /**
      * Set Up the XQueryService
      *
@@ -240,22 +382,36 @@ public class EmpresaXND implements DAOInterface {
      * @throws XMLDBException
      */
     private boolean existEmpleado(Empleado e) throws XMLDBException {
-        String query = "for $t in //empleados/employees/userName where $t='" + e.getUserName() + "' return $t";
+        String query = "for $t in //company/employee/userName where $t='" + e.getUserName() + "' return $t";
         ResourceSet result = executeXQuery(colecEmpleados, query);
         return result.getSize() > 0;
     }
-    
+
+    /**
+     * Returns a boolean based in if an id form Incidencia does exist or not
+     *
+     * @param e Empleado to create
+     * @return boolean
+     * @throws XMLDBException
+     */
+    private boolean existIncidencia(String id) throws XMLDBException {
+        String query = "for $t in //company/incidents/id where $t='" + id + "' return $t";
+        ResourceSet result = executeXQuery(colecIncidencias, query);
+        return result.getSize() > 0;
+    }
+
     /**
      * Executes the query of a selected colection
+     *
      * @param colection
      * @param query
-     * @throws XMLDBException 
+     * @throws XMLDBException
      */
     private void executeQueryUpdate(String colection, String query) throws XMLDBException {
         XQueryService servicio = setUpQuery(colection);
         CompiledExpression consultaCompilada = servicio.compile(query);
         servicio.execute(consultaCompilada);
     }
-    
+
     //Finish of user extra functions
 }

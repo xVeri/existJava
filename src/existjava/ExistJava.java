@@ -5,7 +5,11 @@
  */
 package existjava;
 
-import ExistJavaDAO.Empleado;
+import ExistJavaDAO.Loops;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.xmldb.api.base.XMLDBException;
+
 
 /**
  *
@@ -17,7 +21,11 @@ public class ExistJava {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-    }
-    
+        Loops x = new Loops();
+        try {
+            x.startProgram();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | XMLDBException ex) {
+            ex.getMessage();
+        }
+    }   
 }

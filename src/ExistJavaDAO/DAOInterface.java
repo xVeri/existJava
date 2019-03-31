@@ -27,21 +27,21 @@ public interface DAOInterface {
     public boolean removeEmpleado(Empleado e) throws XMLDBException;
 
     // Obtener una Incidencia a partir de su Id.
-    public Incidencia getIncidenciaById(String id);
+    public Incidencia getIncidenciaById(String id) throws XMLDBException, MyException;
 
     // Obtener una lista de todas las incidencias
-    public List<Incidencia> selectAllIncidencias();
+    public List<Incidencia> selectAllIncidencias() throws XMLDBException;
 
     // Insertar una incidencia a partir de un objeto incidencia
-    public boolean insertIncidencia(Incidencia i);
+    public boolean insertIncidencia(Incidencia i) throws XMLDBException;
 
     // Obtener la lista de incidencias con destino un determinado
     // empleado, a partir de un objeto empleado.
-    public List<Incidencia> getIncidenciaByDestino(Empleado e);
+    public List<Incidencia> getIncidenciaByDestino(Empleado e) throws XMLDBException;
 
     // Obtener la lista de incidencias con origen un determinado
     // empleado, a partir de un objeto empleado.
-    public List<Incidencia> getIncidenciaByOrigen(Empleado e);
+    public List<Incidencia> getIncidenciaByOrigen(Empleado e) throws XMLDBException;
 
     
     // Método para insertar un evento en la tabla historial.
@@ -51,10 +51,10 @@ public interface DAOInterface {
     // 1) Cuando un usuario hace login 
     // 2) Cuando un usuario crea una incidencia de tipo urgente 
     // 3) Cuando se consultan las incidencias destinadas a un usuario 
-    public boolean insertarEvento(Evento e);
+    public void insertarEvento(Evento e) throws XMLDBException;
     
     // Obtener la fecha-hora del último inicio de sesión para un empleado.
-    public Evento getUltimoInicioSesion(Empleado e);
+    public Evento getUltimoInicioSesion(Empleado e) throws XMLDBException;
 
     // Obtener el ranking de los empleados por cantidad de incidencias
     // urgentes creadas (más incidencias urgentes primero).
